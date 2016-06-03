@@ -1,3 +1,13 @@
 Models
 Midi
 final_data
+Hidden
+
+# Latex compilation files
+*.gz
+*.out
+*.log
+*.bbl
+*.blg
+*.aux
+*.plist

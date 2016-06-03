@@ -12,7 +12,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 # Numpy
 import numpy as np
-import os
+import unicodecsv as csv
 import re
 import colorsys
 
@@ -22,28 +22,50 @@ output_file("../Results/tsne.html")
 data_path = "../Results/data.csv"
 data = np.transpose(np.loadtxt(data_path, delimiter=','))
 
-# Compute PCA
-print "Compute PCA"
-pca = PCA(n_components=50)
-data_pca = pca.fit_transform(data)
-# Compute t-SNE
-print "Compute t-SNE"
-tsne = TSNE(n_components=2, random_state=0, n_iter=200)
-data_reduced = tsne.fit_transform(data)
-
-# Labelling and colours
 # load the change track matrix
 time_pointer_path = "../final_data/time_pointer2.csv"
 time_pointer = np.loadtxt(time_pointer_path, delimiter=',')
+
+# Beginning of tracks in the new event granularity : tp_ne
+event_total_path = "../final_data/event_total2.csv"
+event_total = np.loadtxt(event_total_path, delimiter=',')
+tp_ne = np.zeros((time_pointer.shape[0]-1))  # Last item is useless (end of the last track)
+current_track = 0
+event_counter = 0
+for index in range(event_total.shape[0]):
+    if event_total[index]:
+        event_counter += 1
+    if index == time_pointer[current_track]+1:
+        tp_ne[current_track] = event_counter
+        current_track += 1
+
+# Compute reduction : mask data with event_total
+event_total = event_total.astype(np.int)
+data_ne = data[event_total, :]
+
+# # Compute PCA
+# print "Compute PCA"
+# pca = PCA(n_components=50)
+# data_pca = pca.fit_transform(data)
+# Compute t-SNE
+print "Compute t-SNE"
+tsne = TSNE(n_components=2, random_state=0, n_iter=200)
+data_reduced = tsne.fit_transform(data_ne)
+
+# Labelling and colours
+# Save data
+np.savetxt("tsne.csv", data_reduced, delimiter=',')
+
 # Build list name
-folder_content = os.listdir("../Midi/Classe/")
 file_names = []
-for file_name in folder_content:
-    extension = r"\.mid$"
-    if re.search(extension, file_name):
-        fname_no_extension = re.sub(extension, "", file_name)
-        fname_no_parenthesis = re.sub(r"\(.*$", "", fname_no_extension)
+extension = ur"\.mid$"
+with open("../final_data/track_list2.csv", "rb") as f:
+    reader = csv.reader(f, delimiter=";")
+    for row in reader:
+        fname_no_extension = re.sub(extension, "", row[0], re.U)
+        fname_no_parenthesis = re.sub(ur"\(.*$", "", fname_no_extension, re.U)
         file_names.append(fname_no_parenthesis)
+
 # Colors list
 num_track = len(file_names)
 def map_color(e):
@@ -62,7 +84,7 @@ def labelling(time):
     return file_names[i], colors[i]
 
 
-# Plot
+# Plot t-SNE map
 print "Plot data"
 TOOLS="crosshair,pan,wheel_zoom,box_zoom,reset,hover,previewsave"
 
@@ -75,7 +97,7 @@ source = ColumnDataSource(
     )
 )
 
-p = figure(title="Embedding for similarity/dissimilarity (reduced to 2 dim with t-SNE)", tools=TOOLS)
+p = figure(title="Chord embedding # t-SNE visualization", tools=TOOLS)
 p.circle('x', 'y', color='color', line_width=2, source=source)
 
 hover = p.select(dict(type=HoverTool))

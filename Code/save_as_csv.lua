@@ -1,7 +1,7 @@
 require 'torch'
 
-data=torch.load("../final_data/event_total.csv",'ascii')
-path="../final_data/event_total2.csv"
+data=torch.load("../Results/output_siamese1.csv",'ascii')
+path="../Results/data.csv"
 
 function write_tensor(path, data, sep)
     local out = assert(io.open(path, "w")) -- open a file for serialization
@@ -42,7 +42,18 @@ function write_table_1D(path, data, sep)
     file:close()
 end
 
+function write_table_1D_str(path, data, sep)
+    sep = sep or ','
+    local file = assert(io.open(path, "w"))
+    for i=1,#data do
+        file:write(data[i])
+        file:write("\n")
+    end
+    file:close()
+end
+
 
 -- write_tensor(path, data, ",")
 -- write_table(path, data, ",")
-write_table_1D(path, data, ",")
+-- write_table_1D(path, data, ",")
+write_table_1D_str(path, data, ";")

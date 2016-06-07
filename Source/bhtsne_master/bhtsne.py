@@ -15,7 +15,7 @@ Example:
 
 The output will not be normalised, maybe the below one-liner is of interest?:
 
-    python -c 'import numpy;  from sys import stdin, stdout;
+    python -c 'import numpy;  from sys import stdin, stdout; 
         d = numpy.loadtxt(stdin); d -= d.min(axis=0); d /= d.max(axis=0);
         numpy.savetxt(stdout, d, fmt="%.8f", delimiter="\t")'
 

@@ -8,8 +8,9 @@ from collections import OrderedDict
 from bokeh.plotting import *
 
 # SKlearn
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
+# from sklearn.manifold import TSNE
+# from sklearn.decomposition import PCA
+from bhtsne_master.bhtsne import bh_tsne
 # Numpy
 import numpy as np
 import unicodecsv as csv
@@ -60,18 +61,34 @@ data_ne = data[event_total, :]
 
 data_ne = data_ne[:500,:]
 
-# # Compute PCA
-# print "Compute PCA"
-# pca = PCA(n_components=50)
-# data_pca = pca.fit_transform(data)
-# Compute t-SNE
 if __name__ == '__main__':
+    # # Compute PCA
+    # print "Compute PCA"
+    # pca = PCA(n_components=50)
+    # data_pca = pca.fit_transform(data)
+    # Compute t-SNE
     if COMPUTE:
         print "Compute t-SNE"
-        tsne = TSNE(n_components=2, random_state=0, n_iter=200)
-        data_reduced = tsne.fit_transform(data_ne)
+        input_dim = data_ne.shape[1]
+        data_reduced = bh_tsne(data_ne, no_dims=2, initial_dims=input_dim, perplexity=50)
+        # tsne = TSNE(n_components=2, random_state=0, n_iter=200)
+        # data_reduced = tsne.fit_transform(data_ne)
     else:
         data_reduced = np.loadtxt("tsne.csv", delimiter=",")
+
+    filename = 'srodifj'
+    f = open(filename, 'wb')
+    for result in bh_tsne(data_ne, no_dims=2, perplexity=50):
+        fmt = ''
+        for i in range(1, len(result)):
+            fmt = fmt + '{}\t'
+        fmt = fmt + '{}\n'
+        f.write(fmt.format(*result))
+    f.close()
+
+    # read from f
+    data_reduced = np.loadtxt(filename, delimiter='\t')
+    import pdb; pdb.set_trace()
 
     # Labelling and colours
     # Save data

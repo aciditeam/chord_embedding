@@ -3,6 +3,9 @@ Midi
 final_data
 Hidden
 
+# binary
+Source/bhtsne_master/bh_tsne
+
 # Latex compilation files
 *.gz
 *.out
@@ -11,3 +14,6 @@ Hidden
 *.blg
 *.aux
 *.plist
+
+# Python compilation files
+*.pyc

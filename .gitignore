@@ -17,3 +17,4 @@ Source/bhtsne_master/bh_tsne
 
 # Python compilation files
 *.pyc
+*.csv

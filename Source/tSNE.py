@@ -17,7 +17,7 @@ import unicodecsv as csv
 import re
 import colorsys
 
-COMPUTE = True
+COMPUTE = False
 
 # Get data
 print "Load data"
@@ -57,9 +57,11 @@ def map_color(e, N):
 
 # Compute reduction : mask data with event_total
 event_total = event_total.astype(np.int)
+import pdb; pdb.set_trace()
+
 data_ne = data[event_total, :]
 
-data_ne = data_ne[:500,:]
+# data_ne = data_ne[:500,:]
 
 if __name__ == '__main__':
     # # Compute PCA
@@ -71,23 +73,25 @@ if __name__ == '__main__':
         print "Compute t-SNE"
         input_dim = data_ne.shape[1]
         data_reduced = bh_tsne(data_ne, no_dims=2, initial_dims=input_dim, perplexity=50)
+        filename = 'srodifj'
+        f = open(filename, 'wb')
+        for result in bh_tsne(data_ne, no_dims=2, perplexity=50):
+            fmt = ''
+            for i in range(1, len(result)):
+                fmt = fmt + '{}\t'
+            fmt = fmt + '{}\n'
+            f.write(fmt.format(*result))
+        f.close()
+
+        # read from f
+        data_reduced = np.loadtxt(filename, delimiter='\t')
+
+        # Sklearn version
         # tsne = TSNE(n_components=2, random_state=0, n_iter=200)
         # data_reduced = tsne.fit_transform(data_ne)
     else:
         data_reduced = np.loadtxt("tsne.csv", delimiter=",")
 
-    filename = 'srodifj'
-    f = open(filename, 'wb')
-    for result in bh_tsne(data_ne, no_dims=2, perplexity=50):
-        fmt = ''
-        for i in range(1, len(result)):
-            fmt = fmt + '{}\t'
-        fmt = fmt + '{}\n'
-        f.write(fmt.format(*result))
-    f.close()
-
-    # read from f
-    data_reduced = np.loadtxt(filename, delimiter='\t')
     import pdb; pdb.set_trace()
 
     # Labelling and colours

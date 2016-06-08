@@ -57,9 +57,13 @@ def map_color(e, N):
 
 # Compute reduction : mask data with event_total
 event_total = event_total.astype(np.int)
-data_ne = data[event_total, :]
-
-data_ne = data_ne[:500,:]
+mask = []
+counter = 0
+for e in event_total:
+    if e == 1:
+        mask.append(counter)
+    counter += 1
+data_ne = data[mask,:]
 
 if __name__ == '__main__':
     # # Compute PCA
@@ -76,7 +80,7 @@ if __name__ == '__main__':
     else:
         data_reduced = np.loadtxt("tsne.csv", delimiter=",")
 
-    filename = 'srodifj'
+    filename = 'TEMP'
     f = open(filename, 'wb')
     for result in bh_tsne(data_ne, no_dims=2, perplexity=50):
         fmt = ''

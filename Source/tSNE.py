@@ -17,7 +17,7 @@ import unicodecsv as csv
 import re
 import colorsys
 
-COMPUTE = True
+COMPUTE = False
 
 # Get data
 print "Load data"
@@ -73,30 +73,28 @@ if __name__ == '__main__':
     # Compute t-SNE
     if COMPUTE:
         print "Compute t-SNE"
-        input_dim = data_ne.shape[1]
-        data_reduced = bh_tsne(data_ne, no_dims=2, initial_dims=input_dim, perplexity=50)
         # tsne = TSNE(n_components=2, random_state=0, n_iter=200)
         # data_reduced = tsne.fit_transform(data_ne)
+        input_dim = data_ne.shape[1]
+        data_reduced = bh_tsne(data_ne, no_dims=2, initial_dims=input_dim, perplexity=50)
+        filename = 'TEMP'
+        f = open(filename, 'wb')
+        for result in bh_tsne(data_ne, no_dims=2, perplexity=50):
+            fmt = ''
+            for i in range(1, len(result)):
+                fmt = fmt + '{}\t'
+            fmt = fmt + '{}\n'
+            f.write(fmt.format(*result))
+        f.close()
+
+        # read from f
+        data_reduced = np.loadtxt(filename, delimiter='\t')
+
+        # Labelling and colours
+        # Save data
+        np.savetxt("tsne.csv", data_reduced, delimiter=',')
     else:
         data_reduced = np.loadtxt("tsne.csv", delimiter=",")
-
-    filename = 'TEMP'
-    f = open(filename, 'wb')
-    for result in bh_tsne(data_ne, no_dims=2, perplexity=50):
-        fmt = ''
-        for i in range(1, len(result)):
-            fmt = fmt + '{}\t'
-        fmt = fmt + '{}\n'
-        f.write(fmt.format(*result))
-    f.close()
-
-    # read from f
-    data_reduced = np.loadtxt(filename, delimiter='\t')
-    import pdb; pdb.set_trace()
-
-    # Labelling and colours
-    # Save data
-    np.savetxt("tsne.csv", data_reduced, delimiter=',')
 
     # Build list name
     file_names = []
@@ -117,18 +115,24 @@ if __name__ == '__main__':
         i = 0
         while(tp[i] <= time):
             i += 1
+            if i == tp.shape[0]:
+                i = -1  # take last index
+                break
         return file_names[i], colors[i]
 
     # Plot t-SNE map
     print "Plot data"
     TOOLS="crosshair,pan,wheel_zoom,box_zoom,reset,hover,previewsave"
 
+    # Plot only one point out of N
+    plot_period = 10
+    range_plot = range(0, data_reduced.shape[0], plot_period)
     source = ColumnDataSource(
         data=dict(
-            x=data_reduced[:,0],
-            y=data_reduced[:,1],
-            label=[labelling(e, tp_ne)[0] for e in range(data_reduced.shape[0])],
-            color=[labelling(e, tp_ne)[1] for e in range(data_reduced.shape[0])]
+            x=data_reduced[plot_period,0],
+            y=data_reduced[plot_period,1],
+            label=[labelling(e, tp_ne)[0] for e in plot_period],
+            color=[labelling(e, tp_ne)[1] for e in plot_period]
         )
     )
 

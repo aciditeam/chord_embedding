@@ -18,6 +18,7 @@ import re
 import colorsys
 
 COMPUTE = False
+highlighted_track = 'Beethoven_PnoCrto2_i(1-16)_ORCH+REDUC+piano.mid'
 
 # Get data
 print "Load data"
@@ -99,17 +100,25 @@ if __name__ == '__main__':
     # Build list name
     file_names = []
     extension = ur"\.mid$"
+    def processing_name(name):
+        fname_no_extension = re.sub(extension, "", name, re.U)
+        fname_no_parenthesis = re.sub(ur"\(.*$", "", fname_no_extension, re.U)
+        fname_no_path = re.split(ur"/", fname_no_parenthesis, re.U)[-1]
+        return fname_no_path
     with open("../final_data/track_list2.csv", "rb") as f:
         reader = csv.reader(f, delimiter=";")
         for row in reader:
-            fname_no_extension = re.sub(extension, "", row[0], re.U)
-            fname_no_parenthesis = re.sub(ur"\(.*$", "", fname_no_extension, re.U)
-            file_names.append(fname_no_parenthesis)
+            file_names.append(processing_name(row[0]))
 
     # Colors list
     num_track = len(file_names)
     colors = [map_color(e, num_track) for e in range(len(file_names))]
 
+    # get index of hihlighted track
+    import pdb; pdb.set_trace()
+
+    highlighted_ind = file_names.index(processing_name(highlighted_track))
+    colors[highlighted_ind] = "#000000"
     # Define a function for labelling the data
     def labelling(time, tp):
         i = 0
@@ -129,10 +138,10 @@ if __name__ == '__main__':
     range_plot = range(0, data_reduced.shape[0], plot_period)
     source = ColumnDataSource(
         data=dict(
-            x=data_reduced[plot_period,0],
-            y=data_reduced[plot_period,1],
-            label=[labelling(e, tp_ne)[0] for e in plot_period],
-            color=[labelling(e, tp_ne)[1] for e in plot_period]
+            x=data_reduced[range_plot,0],
+            y=data_reduced[range_plot,1],
+            label=[labelling(e, tp_ne)[0] for e in range_plot],
+            color=[labelling(e, tp_ne)[1] for e in range_plot]
         )
     )
 

@@ -7,7 +7,8 @@ from bokeh.models import HoverTool
 from collections import OrderedDict
 from bokeh.plotting import *
 
-import sklearn
+import sklearn.manifold
+import sklearn.decomposition
 
 from tsne import tsne
 # Numpy
@@ -25,7 +26,7 @@ import colorsys
 # mds
 # tsne
 method = 'isomap'
-COMPUTE = False
+COMPUTE = True
 highlighted_track = 'Beethoven_PnoCrto2_i(1-16)_ORCH+REDUC+piano.mid'
 ############################################################
 ############################################################
@@ -79,36 +80,45 @@ data_ne = data[mask,:]
 if __name__ == '__main__':
     if COMPUTE:
         if method == 'pca':
+            print "Compute pca"
             pca = sklearn.decomposition.PCA(n_components=2)
             data_reduced = pca.fit_transform(data_ne)
         elif method == 'isomap':
+            print "Compute isomap"
             isomap = sklearn.manifold.Isomap()
             data_reduced = isomap.fit_transform(data_ne)
         elif method == 'lle':
-            lle = sklearn.decomposition.LocallyLinearEmbedding()
+            print "Compute locally linear embedding"
+            lle = sklearn.manifold.LocallyLinearEmbedding()
             data_reduced = lle.fit_transform(data_ne)
         elif method == 'mlle':
-            mlle = sklearn.decomposition.LocallyLinearEmbedding(method='modified')
+            print "Compute modified lle"
+            mlle = sklearn.manifold.LocallyLinearEmbedding(method='modified')
             data_reduced = mlle.fit_transform(data_ne)
         elif method == 'hlle':
-            hlle = sklearn.decomposition.LocallyLinearEmbedding(method='hessian')
+            print "Compute hessian lle"
+            hlle = sklearn.manifold.LocallyLinearEmbedding(method='hessian')
             data_reduced = hlle.fit_transform(data_ne)
         elif method == 'ltsa':
-            ltsa = sklearn.decomposition.LocallyLinearEmbedding(method='ltsa')
+            print "Compute local tangent space embedding"
+            ltsa = sklearn.manifold.LocallyLinearEmbedding(method='ltsa')
             data_reduced = ltsa.fit_transform(data_ne)
         elif method == 'se':
+            print "Compute spectral embedding"
             se = sklearn.manifold.SpectralEmbedding()
             data_reduced = se.fit_transform(data_ne)
         elif method == 'mds':
+            print "Compute multidimensional scaling"
             mds = sklearn.manifold.MDS()
             data_reduced = mds(data_ne)
         elif method == 'tsne':
+            print "Compute t-SNE"
             data_reduced = tsne(data_ne)
 
         # Save data
-        np.savetxt(method + ".csv", data_reduced, delimiter=',')
+        np.savetxt('../Results/' + method + ".csv", data_reduced, delimiter=',')
     else:
-        data_reduced = np.loadtxt(method + ".csv", delimiter=",")
+        data_reduced = np.loadtxt('../Results/' + method + ".csv", delimiter=",")
 
     # Build list name
     file_names = []
@@ -128,8 +138,6 @@ if __name__ == '__main__':
     colors = [map_color(e, num_track) for e in range(len(file_names))]
 
     # get index of hihlighted track
-    import pdb; pdb.set_trace()
-
     highlighted_ind = file_names.index(processing_name(highlighted_track))
     colors[highlighted_ind] = "#000000"
     # Define a function for labelling the data

@@ -9,7 +9,6 @@ import numpy as np
 
 
 def tsne(data):
-    print "Compute t-SNE"
     # Sklearn version
     # tsne = TSNE(n_components=2, random_state=0, n_iter=200)
     # data_reduced = tsne.fit_transform(data)

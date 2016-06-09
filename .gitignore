@@ -2,8 +2,6 @@ Models
 Midi
 final_data
 Hidden
-Results
-!Results/tsne.html
 
 # binary
 Source/bhtsne_master/bh_tsne

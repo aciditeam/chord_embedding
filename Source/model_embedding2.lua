@@ -138,7 +138,7 @@ function train(model,trainData,matrix,options)
     inputs[1] = torch.Tensor(mId-t, ninputs);
     inputs[2] = torch.Tensor(mId-t, ninputs);
     -- iterate over mini-batch examples
-    for i = t,(mId - 1) do
+    for i = t,mId do
       -- load first sample
       local i1 = matrix[trainData[shuffle[i]][1]]
       -- load second sample
